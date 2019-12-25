@@ -1,0 +1,4 @@
+[submodule "lib/fatslack"]
+	path = lib/fatslack
+	url = https://github.com/deviousasti/FatSlack.git
+	branch = master
