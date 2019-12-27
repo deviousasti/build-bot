@@ -3,7 +3,7 @@
 open System
 open System.IO
 
-type ConfigSection = { Name: string; Path: string option; Values: Map<string,string> }
+type ConfigSection = { Name: string; Path: string; Values: Map<string,string> }
 
 let parse config_file =
     let isSectionHeader (line:string) = line.StartsWith("[") && line.EndsWith("]")
@@ -14,7 +14,7 @@ let parse config_file =
             (split.[0], "")
 
     let splitSectionHeader (line:string) = 
-        line.Trim('[',']').Split([|' '|], 2) |> toTuple
+        line.Split([|' '|], 2) |> Array.map(fun s -> s.Trim('[',']', ' ', '"')) |> toTuple
         
     let splitValue (line:string) = 
         line.Split([|'='|], 2) |> Array.map(fun s-> s.Trim()) |> toTuple
@@ -24,19 +24,17 @@ let parse config_file =
     |> Seq.map (fun s -> s.Trim())
     |> Seq.scan (fun (section, prev) line -> 
                     if isSectionHeader line then 
-                        splitSectionHeader line                        
+                        (line, line)                        
                     else
                         (section, line)
     ) ("", "")
     |> Seq.skip  1
     |> Seq.groupBy fst
     |> Seq.map (fun (key, list) -> 
+        let header = splitSectionHeader key         
         {
-            Name = key;
-            Path =  list 
-                    |> Seq.map snd 
-                    |> Seq.tryHead 
-                    |> Option.filter (not << String.IsNullOrWhiteSpace);
+            Name =  fst header;
+            Path =  snd header;
             Values = 
                     list 
                     |> Seq.skip 1 
@@ -45,4 +43,8 @@ let parse config_file =
         })
         
     
-
+let tryParse config_file =
+    if File.Exists config_file then
+        parse config_file 
+    else
+        Seq.empty
