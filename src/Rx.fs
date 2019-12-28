@@ -13,3 +13,11 @@ module Observable =
 module Disposable =
     let empty = Disposable.create id
     let compose seq = seq |> Seq.toArray |> Disposables.compose
+
+module Subject =
+    let empty = { new System.Reactive.Subjects.ISubject<_> with
+                      member this.OnCompleted() = ()
+                      member this.OnError(error) = ()
+                      member this.OnNext(value) = ()
+                      member this.Subscribe(observer) = Disposable.empty
+                }
