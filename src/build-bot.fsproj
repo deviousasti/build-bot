@@ -12,8 +12,9 @@
     <Compile Include="Shell.fs" />
     <Compile Include="ConfigParser.fs" />
     <Compile Include="Git.fs" />
-    <Compile Include="Bot.fs" />
+    <Compile Include="Targets.fs" />
     <Compile Include="Build.fs" />
+    <Compile Include="Bot.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
 
