@@ -9,10 +9,11 @@ open FatSlack.Configuration
 open System.Reactive.Subjects
 open FSharp.Control.Reactive
 open System.Reactive
+open System.IO
 
-type BotStream = { Receiver : IObservable<ChatMessage>; }
+type BotStream = ISubject<Message, ChatMessage>
 
-let start apiToken =
+let start apiToken : BotStream =
     let receiver = Subject.broadcast
     let api =
         init
@@ -21,12 +22,22 @@ let start apiToken =
         |> withSpyCommand 
             { 
                 Description = "none"; 
-                EventMatcher = fun _ event -> receiver.OnNext(PostMessage(event)); false;
+                EventMatcher = fun _ event -> receiver.OnNext(event); false;
                 EventHandler = fun _ _  -> ()
             }
         |> withHelpCommand
         |> BotApp.start        
     
     let sender = Observer.Create(fun message -> api.Send message |> ignore)    
-    Subject.Create<Message>(sender, receiver)
-    
+    Subject.Create<Message, ChatMessage>(sender, receiver)
+  
+let messageText (msg: ChatMessage) = 
+    msg.Text
+
+let isHello (msg: ChatMessage) = msg.Type = "hello"
+
+let writeMessage (tw: TextWriter) (msg: ChatMessage) = 
+    tw.Write(sprintf "[%s] %s" msg.Type msg.Text)
+
+let send message (stream:BotStream) = stream.OnNext(message)
+
