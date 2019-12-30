@@ -45,8 +45,9 @@ let gitTree source =
             }
     }
     
-let gitGraph workspace =
-    Directory.EnumerateDirectories workspace
+let gitGraph (workspace:string) =
+    workspace.Split ';'
+    |> Seq.collect(Directory.EnumerateDirectories)
     |> Seq.filter(Git.Paths.isGitDirectory)
     |> Seq.collect(gitTree)
     |> Seq.groupBy(fun repo -> repo.remote)

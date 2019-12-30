@@ -7,11 +7,10 @@ type ConfigSection = { Name: string; Path: string; Values: Map<string,string> }
 
 let parse config_file =
     let isSectionHeader (line:string) = line.StartsWith("[") && line.EndsWith("]")
-    let toTuple split = 
-        if Array.length split > 1 then
-            (split.[0], split.[1])            
-        else
-            (split.[0], "")
+    let toTuple = function 
+        | [|x|]     -> (x, "")
+        | [|x; y|]  -> (x, y)
+        | _         -> ("", "")
 
     let splitSectionHeader (line:string) = 
         line.Split([|' '|], 2) |> Array.map(fun s -> s.Trim('[',']', ' ', '"')) |> toTuple
