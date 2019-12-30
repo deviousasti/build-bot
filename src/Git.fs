@@ -23,4 +23,11 @@ let version () = git "--version" "."
 
 let pull = git "pull"
 let push = git "push"
+let hardreset = git "reset --hard"
 
+let rootUrl (remote:string) = 
+    let trailing = remote.LastIndexOf(".git", StringComparison.InvariantCultureIgnoreCase)
+    if trailing = -1 then
+        remote
+    else
+        remote.Substring(0, trailing)
