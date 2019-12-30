@@ -28,6 +28,7 @@ module Options =
                WorkingDirectory: string option;
                ExitCodes: int[];
                ExitDelay: int;
+               EnvironmentVariables: Map<string, string>;
         }
 
     let defaultSettings = 
@@ -41,6 +42,7 @@ module Options =
             WorkingDirectory = None;
             ExitCodes = [| 0 |];
             ExitDelay = 100;
+            EnvironmentVariables = Map.empty;
         }
 
 
@@ -146,11 +148,14 @@ let private run (args:ProcessStartInfo) (settings: Options.ShellSettings) (obser
 let createWith (settings:Options.ShellSettings) (args:ProcessStartInfo)  =
     args.RedirectStandardInput  <- settings.RedirectInput
     args.RedirectStandardOutput <- settings.RedirectOutput
-    args.RedirectStandardError  <- settings.RedirectError
+    args.RedirectStandardError  <- settings.RedirectError    
     args.UseShellExecute        <- false
     args.WorkingDirectory       <- match settings.WorkingDirectory with 
                                    | Some(dir) -> dir
                                    | None -> Directory.GetCurrentDirectory()
+
+    settings.EnvironmentVariables 
+    |> Map.iter(fun key value -> args.EnvironmentVariables.[key] <- value)
 
     Observable.createWithDisposable (run args settings)
 
