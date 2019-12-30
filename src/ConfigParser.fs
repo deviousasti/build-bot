@@ -5,8 +5,23 @@ open System.IO
 
 type ConfigSection = { Name: string; Path: string; Values: Map<string,string> }
 
+(*
+Ref: https://git-scm.com/docs/git-config#_syntax
+Sample: 
+    # This is the config file, and
+    # a '#' or ';' character indicates
+    # a comment
+    #
+
+    [section "subsection"]
+	    ; Don't trust file modes
+	    filemode = false
+*)
+
+let isSectionHeader (line:string) = line.StartsWith("[") && line.EndsWith("]")
+let isComment (line:string) = line.StartsWith(';') || line.StartsWith('#')
+
 let parse config_file =
-    let isSectionHeader (line:string) = line.StartsWith("[") && line.EndsWith("]")
     let toTuple = function 
         | [|x|]     -> (x, "")
         | [|x; y|]  -> (x, y)
@@ -21,6 +36,7 @@ let parse config_file =
 
     File.ReadLines(config_file)
     |> Seq.map (fun s -> s.Trim())
+    |> Seq.filter (not << isComment)
     |> Seq.scan (fun (section, prev) line -> 
                     if isSectionHeader line then 
                         (line, line)                        
@@ -30,13 +46,12 @@ let parse config_file =
     |> Seq.skip  1
     |> Seq.groupBy fst
     |> Seq.map (fun (key, list) -> 
-        let header = splitSectionHeader key         
+        let (header, path) = splitSectionHeader key         
         {
-            Name =  fst header;
-            Path =  snd header;
+            Name =  header;
+            Path =  path;
             Values = 
                     list 
-                    |> Seq.skip 1 
                     |> Seq.map (snd >> splitValue) 
                     |> Map.ofSeq;
         })
