@@ -3,12 +3,15 @@
 open System
 open System.IO
 open FSharp.Control.Reactive
+open System.Reactive
 
 type private GitRel = 
     { path: string; relative: string list; remote: string; }
 
-type Repository = { local: string; remote: string; root: string }
+type Repository = { local: string; remote: string; root: string; name: string;  }
 type Graph = Map<string, seq<Repository>>
+
+let private combine p1 p2 = Path.Combine(p1, p2)
 
 let gitTree source =
     //recursively build dependency tree and 
@@ -32,14 +35,14 @@ let gitTree source =
             for submod in findurl "submodule" do       
                 let subpath = Git.Paths.submodule source submod.path
                 yield! build subpath submod.relative
-        }
-    
-    let combine p1 p2 = Path.Combine(p1, p2)
+        }  
+
     seq {
         let repos = build (combine source ".git") [] 
         for repo in repos do 
             yield { 
                 root = source;
+                name = Path.GetFileName(source);
                 remote  = repo.remote;
                 local = repo.relative 
                         |> List.skip 1
@@ -74,10 +77,11 @@ let getBuildTargets buildroot =
     let config = ConfigParser.tryParse file |> List.ofSeq
     match config with 
     | [] -> ["debug";"release"] |> List.map(fun t -> t, Map.empty)
-    | [x] -> x.Values |> Map.toList |> List.map (fun (_, value) -> value, Map.empty)
+    | [x] -> x.Values |> Map.toList |> List.map (fun (key, value) -> key, Map.empty)
     | many -> many |> List.map (fun section -> section.Name, section.Values)
 
 type Pipeline = string * (string -> IObservable<string>)
+
 
 let build (repo:Repository) =
     let buildroot = repo.root 
@@ -104,3 +108,50 @@ let build (repo:Repository) =
                 let settings' = { settings with EnvironmentVariables = env }
                 yield Pipeline(target, pipeline settings')
     }
+
+let logfile target (repo:Repository) = 
+    let name = repo.name
+    let logfilename = sprintf "%s-%s-%d.log" name target (DateTime.UtcNow.ToFileTime())
+    combine (Path.GetTempPath()) logfilename
+
+type BuildStatus = { Repository: Repository; Target: string; Log: string option; Reason : string option; }
+type BuildResult = Result<BuildStatus, BuildStatus>
+
+let run (repo:Repository) =
+    let toResult target log observable =
+        observable
+        |> Observable.materialize
+        |> Observable.last
+        |> Observable.map (
+            fun notification -> 
+            let result = { Repository = repo; Target = target; Log = log; Reason = None }
+            match notification.Kind with 
+            | NotificationKind.OnCompleted -> Ok(result)                                     
+            | NotificationKind.OnError -> Error({ result with Reason = Some notification.Exception.Message })                                     
+            | _ -> failwith "Unexpected kind"
+        )
+
+    let pull =
+        update repo 
+        |> Observable.log "Git"
+        |> Observable.ignoreElements        
+        |> Observable.retryCount 3
+        |> Observable.mapTo Unchecked.defaultof<Result<BuildStatus, BuildStatus>>
+
+    let builds =         
+        build repo 
+        |> Seq.map(fun (target, pipeline) ->             
+            let log = logfile target repo
+            Observable.using 
+                (fun () -> new StreamWriter(File.OpenWrite(log)))
+                (fun file -> 
+                    pipeline target 
+                    |> Observable.log ("Build " + target)
+                    |> Observable.iter (file.WriteLine)
+                )
+            |> toResult target (Some log)
+        )
+        |> Observable.concatSeq                
+    
+    Observable.concat builds pull  
+    
