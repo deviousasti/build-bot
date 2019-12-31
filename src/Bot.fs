@@ -28,7 +28,10 @@ let start apiToken : BotStream =
         |> withHelpCommand
         |> BotApp.start        
     
-    let sender = Observer.Create(fun message -> api.Send message |> ignore)    
+    let sender = Observer.Create(fun message -> 
+       let response = api.Send message |> Async.RunSynchronously
+       ()
+    )    
     Subject.Create<Message, ChatMessage>(sender, receiver)
   
 let messageText (msg: ChatMessage) = 
@@ -41,3 +44,15 @@ let writeMessage (tw: TextWriter) (msg: ChatMessage) =
 
 let send message (stream:BotStream) = stream.OnNext(message)
 
+let inline createMessage (msg, result) = 
+    let text status (value : Build.BuildStatus) = (sprintf "Build %s: %s [%s]" status value.Repository.name value.Target)
+    match result with 
+    | Ok value ->   msg 
+                    |> ChatMessage.withText (text "Passed" value)
+                    |> ChatMessage.withAttachments(
+                        [
+                            
+                        ]
+                    )
+    | Error value -> msg |> ChatMessage.withText (text "Failed" value)
+    |> PostMessage
