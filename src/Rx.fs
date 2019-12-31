@@ -8,7 +8,8 @@ module Observable =
     /// Creates an observable sequence from a specified Subscribe method implementation.
     let createWithDisposable subscribe =
         System.Reactive.Linq.Observable.Create(Func<IObserver<'Result>,IDisposable> subscribe)
-    let log v = v |> Observable.materialize |> Observable.subscribe (printf "%A\n")
+    let subcribeLog v = v |> Observable.materialize |> Observable.subscribe (printf "%A\n")
+    let ignoreElements = System.Reactive.Linq.Observable.IgnoreElements
 
 module Disposable =
     let empty = Disposable.create id
