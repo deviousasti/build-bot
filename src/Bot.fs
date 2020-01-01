@@ -10,6 +10,7 @@ open System.Reactive.Subjects
 open FSharp.Control.Reactive
 open System.Reactive
 open System.IO
+open System.Linq
 
 let messageText (msg: ChatMessage) = 
     let text = msg.Text
@@ -21,16 +22,33 @@ let writeMessage (tw: TextWriter) (msg: ChatMessage) =
     tw.Write(sprintf "[%s] %s" msg.Type msg.Text)
 
 let inline createMessage (msg, result) = 
-    let text status (value : Build.BuildStatus) = (sprintf "Build %s: %s [%s]" status value.Repository.name value.Target)
+    let text (value : Build.BuildStatus) = 
+        (sprintf "Build %s: *%s*" value.Repository.name value.Target)
+
+    let attachLog count title color (value : Build.BuildStatus) = 
+        try 
+            let last = (Enumerable.TakeLast(File.ReadLines(value.Log.Value), count))
+            let log = sprintf "```%s```" (String.Join("\n", last))
+            Attachment.createAttachment (Guid.NewGuid().ToString())
+            |> Attachment.withColor color
+            |> Attachment.withFields [ Field.createLongField title log ]            
+        with _ -> 
+            Attachment.createAttachment ""            
+
     match result with 
     | Ok value ->   msg 
-                    |> ChatMessage.withText (text "Passed" value)
-                    |> ChatMessage.withAttachments(
+                    |> ChatMessage.withText (text value)
+                    |> ChatMessage.withAttachments
                         [
-                            
+                            value |> attachLog 5 "Passed" Good 
                         ]
-                    )
-    | Error value -> msg |> ChatMessage.withText (text "Failed" value)
+                    
+    | Error value -> msg 
+                    |> ChatMessage.withText (text value)
+                    |> ChatMessage.withAttachments
+                        [
+                            value |> attachLog 10 "Failed" Danger 
+                        ]
     |> PostMessage
 
 let isAddressed msg = (messageText msg).StartsWith("@")
