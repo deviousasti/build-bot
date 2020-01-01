@@ -40,14 +40,16 @@ let gitTree source =
     seq {
         let repos = build (combine source ".git") [] 
         for repo in repos do 
+            let local = 
+                repo.relative 
+                |> List.skip 1
+                |> List.rev
+                |> List.fold(combine) source
             yield { 
-                root = source;
-                name = Path.GetFileName(source);
-                remote  = repo.remote;
-                local = repo.relative 
-                        |> List.skip 1
-                        |> List.rev
-                        |> List.fold(combine) source
+                root = source
+                remote  = repo.remote
+                local = local
+                name = Path.GetFileName(local)
             }
     }
     
@@ -68,7 +70,9 @@ let matches (text:string) (graph:Graph) =
         |> Seq.filter(fun (url, _) -> text.Contains(url, StringComparison.InvariantCultureIgnoreCase))
         |> Seq.collect snd
 
-let urls (graph:Graph) = graph |> Map.toSeq |> Seq.map fst
+let urls (graph:Graph)  = graph |> Map.toSeq |> Seq.map fst
+let flatten (graph:Graph) = graph |> Map.toSeq |> Seq.map snd |> Seq.collect id |> Seq.distinct
+let find predicate (graph:Graph) = flatten graph |> Seq.tryFind predicate
 
 let update (repo:Repository) = Git.pull repo.local
 
@@ -133,7 +137,7 @@ let run (repo:Repository) =
 
     let pull =
         update repo 
-        |> Observable.log "Git"
+      //|> Observable.log "Git"
         |> Observable.ignoreElements        
         |> Observable.retryCount 3
         |> Observable.mapTo Unchecked.defaultof<Result<BuildStatus, BuildStatus>>
@@ -146,7 +150,7 @@ let run (repo:Repository) =
                 (fun () -> new StreamWriter(File.OpenWrite(log)))
                 (fun file -> 
                     pipeline target 
-                    |> Observable.log ("Build " + target)
+                  //|> Observable.log ("Build " + target)
                     |> Observable.iter (file.WriteLine)
                 )
             |> toResult target (Some log)
