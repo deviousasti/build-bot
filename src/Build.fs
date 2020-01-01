@@ -122,18 +122,6 @@ type BuildStatus = { Repository: Repository; Target: string; Log: string option;
 type BuildResult = Result<BuildStatus, BuildStatus>
 
 let run (repo:Repository) =
-    let toResult target log observable =
-        observable
-        |> Observable.materialize
-        |> Observable.last
-        |> Observable.map (
-            fun notification -> 
-            let result = { Repository = repo; Target = target; Log = log; Reason = None }
-            match notification.Kind with 
-            | NotificationKind.OnCompleted -> Ok(result)                                     
-            | NotificationKind.OnError -> Error({ result with Reason = Some notification.Exception.Message })                                     
-            | _ -> failwith "Unexpected kind"
-        )
 
     let pull =
         update repo 
@@ -153,7 +141,17 @@ let run (repo:Repository) =
                   //|> Observable.log ("Build " + target)
                     |> Observable.iter (file.WriteLine)
                 )
-            |> toResult target (Some log)
+            |> Observable.materialize
+            |> Observable.last
+            |> Observable.map (
+                fun notification -> 
+                let result = { Repository = repo; Target = target; Log = Some log; Reason = None }
+                match notification.Kind with 
+                | NotificationKind.OnCompleted -> Ok(result)                                     
+                | NotificationKind.OnError -> Error({ result with Reason = Some notification.Exception.Message })                                     
+                | _ -> failwith "Unexpected kind"
+            )
+            |> Observable.delay (TimeSpan.FromSeconds 1.0)
         )
         |> Observable.concatSeq                
     
