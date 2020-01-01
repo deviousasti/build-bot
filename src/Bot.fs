@@ -11,38 +11,14 @@ open FSharp.Control.Reactive
 open System.Reactive
 open System.IO
 
-type BotStream = ISubject<Message, ChatMessage>
-
-let start apiToken : BotStream =
-    let receiver = Subject.broadcast
-    let api =
-        init
-        |> withApiToken apiToken
-        |> withAlias "build-bot"
-        |> withSpyCommand 
-            { 
-                Description = "none"; 
-                EventMatcher = fun _ event -> receiver.OnNext(event); false;
-                EventHandler = fun _ _  -> ()
-            }
-        |> withHelpCommand
-        |> BotApp.start        
-    
-    let sender = Observer.Create(fun message -> 
-       let response = api.Send message |> Async.RunSynchronously
-       ()
-    )    
-    Subject.Create<Message, ChatMessage>(sender, receiver)
-  
 let messageText (msg: ChatMessage) = 
-    msg.Text
+    let text = msg.Text
+    if isNull text then "" else text.Trim()        
 
 let isHello (msg: ChatMessage) = msg.Type = "hello"
 
 let writeMessage (tw: TextWriter) (msg: ChatMessage) = 
     tw.Write(sprintf "[%s] %s" msg.Type msg.Text)
-
-let send message (stream:BotStream) = stream.OnNext(message)
 
 let inline createMessage (msg, result) = 
     let text status (value : Build.BuildStatus) = (sprintf "Build %s: %s [%s]" status value.Repository.name value.Target)
@@ -56,3 +32,29 @@ let inline createMessage (msg, result) =
                     )
     | Error value -> msg |> ChatMessage.withText (text "Failed" value)
     |> PostMessage
+
+let isAddressed msg = (messageText msg).StartsWith("@")
+
+let start apiToken commands =
+    let receiver = Subject.broadcast
+
+    let api =
+        init
+        |> withApiToken apiToken
+        |> withAlias "build-bot"
+        |> withSlackCommands commands
+        |> withSpyCommand 
+            { 
+                Description = "Listens for change notifications"; 
+                EventMatcher = fun _ evt -> not (isAddressed evt) 
+                EventHandler = fun _ evt -> receiver.OnNext(evt)
+            }
+        |> withHelpCommand
+        |> BotApp.start        
+    
+    let sender = Observer.Create(fun message -> 
+       let response = api.Send message |> Async.RunSynchronously
+       ()
+    )    
+    Subject.Create<Message, ChatMessage>(sender, receiver)
+  
