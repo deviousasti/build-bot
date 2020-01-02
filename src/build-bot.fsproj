@@ -5,6 +5,8 @@
     <TargetFramework>netcoreapp3.0</TargetFramework>
     <RootNamespace>build_bot</RootNamespace>
     <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+    <AssemblyVersion>1.0.1.0</AssemblyVersion>
+    <FileVersion>1.0.1.0</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>
