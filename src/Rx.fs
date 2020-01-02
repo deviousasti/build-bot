@@ -18,13 +18,13 @@ module Disposable =
 module Subject =
     let empty = { new System.Reactive.Subjects.ISubject<_> with
                       member this.OnCompleted() = ()
-                      member this.OnError(error) = ()
-                      member this.OnNext(value) = ()
-                      member this.Subscribe(observer) = Disposable.empty
+                      member this.OnError(_) = ()
+                      member this.OnNext(_) = ()
+                      member this.Subscribe(_) = Disposable.empty
                 }
     let empty2 = { new System.Reactive.Subjects.ISubject<_,_> with
         member this.OnCompleted() = ()
-        member this.OnError(error) = ()
-        member this.OnNext(value) = ()
-        member this.Subscribe(observer) = Disposable.empty
+        member this.OnError(_) = ()
+        member this.OnNext(_) = ()
+        member this.Subscribe(_) = Disposable.empty
     }

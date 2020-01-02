@@ -24,7 +24,7 @@ let private postTo api msg =
     |> ignore
 let private invalid = reply "Invalid command"
 
-let buildCommand graph =    
+let buildCommand _workspace graph =    
     {
         Syntax = "build <name>"
         Description = "Builds a repository and posts the result"
@@ -99,4 +99,30 @@ let removeCommand workspace graph =
                             | None ->       msg |> reply "Repository does not exit"
                 | _ -> msg |> invalid
                 |> postTo api
-    }    
+    }   
+    
+let listCommand _workspace graph =    
+    {
+        Syntax = "ls [all]"
+        Description = "Lists tracked repositories"
+        EventMatcher = matches "ls"
+        EventHandler = 
+            fun api msg ->                     
+                let listsource = args msg |> List.isEmpty
+                let repos = 
+                    !graph 
+                    |> Build.flatten 
+                    |> Seq.map (fun r -> if listsource then 
+                                                r.root |> Path.GetFileName
+                                            else if r.local = r.root then
+                                                r.local |> Path.GetFileName
+                                            else
+                                                Path.GetRelativePath(Path.Combine(r.root,  ".."), r.local)
+                                            
+                                )
+                    |> Seq.mapi (sprintf "%d> %s")
+                    |> (fun s -> String.Join("\n", s))
+
+                msg |> reply repos
+                |> postTo api
+    }  
