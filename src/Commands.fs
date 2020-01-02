@@ -31,6 +31,25 @@ let private postTo api msg =
     |> ignore
 let private invalid = reply "Invalid command"
 
+let hiCommand workspace graph =    
+    {
+        Syntax = "hi"
+        Description = "Shows version info and workspace"
+        EventMatcher = matches "hi"
+        EventHandler = 
+            fun api msg ->                        
+                let version = System.Reflection.Assembly.GetEntryAssembly().GetName().Version.ToString()
+                let machine = Environment.MachineName
+                let user = Environment.UserName
+                msg 
+                |> reply (sprintf 
+                            "Hello! This is Build Bot v%s\nI am hosted on %s by user %s" 
+                            version
+                            machine
+                            user
+                )
+                |> postTo api
+    }     
 let buildCommand _workspace graph =    
     {
         Syntax = "build <name>"
