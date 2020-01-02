@@ -14,12 +14,12 @@ let private args msg =
     (Bot.messageText msg).Split([|' '|], StringSplitOptions.RemoveEmptyEntries) 
     |> List.ofArray 
     |> List.map(fun s -> s.Trim('<', '>', '"'))
-    |> List.skip 2
+    |> List.skip (if Bot.isAddressed msg then 2 else 1)
 
-let wildCardToRegex value =
-   "^" + Regex.Escape(value).Replace("\\?", ".").Replace("\\*", ".*") + "$" 
+let private wildCardToRegex value =
+    "^" + Regex.Escape(value).Replace("\\?", ".").Replace("\\*", ".*") + "$" 
 
-let wildCardMatch input pattern =
+let private wildCardMatch input pattern =
     Regex.IsMatch(input, (wildCardToRegex pattern))
 
 let private reply text msg = { msg with ChatMessage.Text = text }
@@ -50,6 +50,8 @@ let hiCommand workspace graph =
                 )
                 |> postTo api
     }     
+
+
 let buildCommand _workspace graph =    
     {
         Syntax = "build <name>"
@@ -58,7 +60,7 @@ let buildCommand _workspace graph =
         EventHandler = 
             fun api msg ->                     
                 match args msg with 
-                | [name] -> match !graph |> Build.find (fun repo -> repo.name = name) with 
+                | [name] -> match !graph |> Build.findByName name with 
                             | None ->       msg |> reply "Matching repository not found"
                             | Some repo ->  msg |> reply (sprintf "Found %s" repo.remote)
                 | _ -> msg |> invalid
@@ -114,7 +116,7 @@ let removeCommand workspace graph =
         EventHandler = 
             fun api msg ->                     
                 match args msg with 
-                | [name] -> match !graph |> Build.find (fun repo -> repo.name = name) with 
+                | [name] -> match !graph |> Build.findByName name with 
                             | Some repo ->  try
                                             Directory.Delete(repo.local)
                                             msg |> rescan workspace graph api |> ignore
@@ -153,3 +155,38 @@ let listCommand _workspace graph =
                 msg |> reply repos
                 |> postTo api
     }  
+
+let pushCommand _workspace graph =    
+    {
+        Syntax = "push <name>"
+        Description = "Commits and pushes the current state of the repository"
+        EventMatcher = matches "push"
+        EventHandler = 
+            fun api msg ->                  
+                let push name message =
+                    match !graph |> Build.findByName name with 
+                    | None -> msg |> reply "Local matching repository not found"
+                    | Some repo ->  
+                        [ 
+                            Git.addAll
+                            Git.commit message
+                            Git.push
+                        ] 
+                        |> List.map (fun y -> y(repo.root))
+                        |> Observable.concatSeq
+                        |> Observable.log "Git"
+                        |> Observable.ignoreElements
+                        |> Observable.subscribeWithCallbacks 
+                            (ignore) 
+                            (fun e ->  msg |> reply (sprintf "Nothing to do") |> postTo api)
+                            (fun () -> msg |> reply "Complete" |> postTo api)
+                        |> ignore
+
+                        msg |> reply (sprintf "Found %s. Pushing..." repo.name)
+
+                match args msg with 
+                | [name] -> push name "[bot] Updated modules"
+                | [name; message] -> push name message
+                | _ -> msg |> invalid
+                |> postTo api
+    }     

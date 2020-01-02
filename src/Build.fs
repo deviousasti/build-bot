@@ -73,6 +73,7 @@ let matches (text:string) (graph:Graph) =
 let urls (graph:Graph)  = graph |> Map.toSeq |> Seq.map fst
 let flatten (graph:Graph) = graph |> Map.toSeq |> Seq.map snd |> Seq.collect id |> Seq.distinct
 let find predicate (graph:Graph) = flatten graph |> Seq.tryFind predicate
+let findByName name = find (fun repo -> String.Equals(repo.name, name, StringComparison.InvariantCultureIgnoreCase))
 
 let update (repo:Repository) = Git.pull repo.local
 

@@ -51,7 +51,7 @@ let inline createMessage (msg, result) =
                         ]
     |> PostMessage
 
-let isAddressed msg = (messageText msg).StartsWith("@")
+let isAddressed msg = (messageText msg).StartsWith("<@")
 
 let start apiToken commands =
     let receiver = Subject.broadcast
