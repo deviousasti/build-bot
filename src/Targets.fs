@@ -44,7 +44,7 @@ let (|Command|_|) =
 
 let (|MSBuild|_|) =
     ifContains "*.sln" (
-        exec "MSBuild" "-p:Configuration=%s"
+        exec "MSBuild" "/restore -p:Configuration=%s"
     )
 
 let (|Makefile|_|) =
