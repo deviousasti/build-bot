@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package >
+  <metadata>
+    <id>build-bot</id>
+    <version>1.0.1</version>
+    <title>build-bot</title>
+    <authors>asti</authors>
+    <owners>asti</owners>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <license type="expression">MIT</license>
+    <projectUrl>https://github.com/deviousasti/build-bot</projectUrl>
+    <iconUrl>https://raw.githubusercontent.com/deviousasti/build-bot/master/icon.png</iconUrl>
+    <description>A zero configuration continuous build bot</description>
+    <copyright>Copyright 2020</copyright>
+    <tags>bot git build-automation continuous-integration slack</tags>
+  </metadata>
+  <files>
+		<file src="src\bin\Debug\netcoreapp3.0\*.*" target="." /> 
+  </files>
+  
+</package>
