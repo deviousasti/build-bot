@@ -24,6 +24,10 @@ let version () = git "--version" "."
 let pull = git "pull"
 let push = git "push"
 let clone url = git (sprintf "clone --recurse-submodules \"%s\"" url)
+let commit message = git (sprintf "commit -m \"%s\"" message)
+let add spec = git ("add " + spec)
+let addAll = add "--all"
+
 let hardreset = git "reset --hard"
 
 let rootUrl (remote:string) = 

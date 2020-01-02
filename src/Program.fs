@@ -35,6 +35,8 @@ let main args =
                     Subject.empty2
         | Some(token) -> Bot.start token 
                           [
+                              Commands.hiCommand    workspace graph
+                              Commands.pushCommand  workspace graph
                               Commands.buildCommand workspace graph
                               Commands.scanCommand  workspace graph
                               Commands.addCommand   workspace graph
