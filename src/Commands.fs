@@ -5,6 +5,7 @@ open FatSlack.Types
 open FSharp.Control
 open FSharp.Control.Reactive
 open System.IO
+open System.Text.RegularExpressions
 
 let private matches toMatch command _ = 
     string(command).Split(' ') |> Array.tryHead |> Option.contains toMatch
@@ -14,6 +15,12 @@ let private args msg =
     |> List.ofArray 
     |> List.map(fun s -> s.Trim('<', '>', '"'))
     |> List.skip 2
+
+let wildCardToRegex value =
+   "^" + Regex.Escape(value).Replace("\\?", ".").Replace("\\*", ".*") + "$" 
+
+let wildCardMatch input pattern =
+    Regex.IsMatch(input, (wildCardToRegex pattern))
 
 let private reply text msg = { msg with ChatMessage.Text = text }
 let private postTo api msg = 
@@ -103,23 +110,24 @@ let removeCommand workspace graph =
     
 let listCommand _workspace graph =    
     {
-        Syntax = "ls [all]"
-        Description = "Lists tracked repositories"
+        Syntax = "ls [all|pattern]"
+        Description = "Lists tracked repositories matching wildcard"
         EventMatcher = matches "ls"
         EventHandler = 
-            fun api msg ->                     
-                let listsource = args msg |> List.isEmpty
+            fun api msg ->       
+                let argv = args msg
                 let repos = 
                     !graph 
                     |> Build.flatten 
-                    |> Seq.map (fun r -> if listsource then 
-                                                r.root |> Path.GetFileName
-                                            else if r.local = r.root then
-                                                r.local |> Path.GetFileName
-                                            else
-                                                Path.GetRelativePath(Path.Combine(r.root,  ".."), r.local)
-                                            
-                                )
+                    |> Seq.map (fun r -> 
+                                         let relpath = Path.GetRelativePath(Path.Combine(r.root,  ".."), r.local)
+                                         match argv with
+                                         | ["all"]   -> Some(relpath)
+                                         | [pattern] -> if wildCardMatch relpath pattern then Some(relpath) else None
+                                         | _ -> Some(r.name)
+                                ) 
+                    |> Seq.choose id
+                    |> Seq.distinct
                     |> Seq.mapi (sprintf "%d> %s")
                     |> (fun s -> String.Join("\n", s))
 
