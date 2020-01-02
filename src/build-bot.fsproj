@@ -7,6 +7,14 @@
     <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
     <AssemblyVersion>1.0.1.0</AssemblyVersion>
     <FileVersion>1.0.1.0</FileVersion>
+    <PackageProjectUrl>https://github.com/deviousasti/build-bot</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/deviousasti/build-bot</RepositoryUrl>
+    <RepositoryType>Git</RepositoryType>
+    <Description>A zero configuration continuous build bot</Description>
+    <Version>1.0.1</Version>
+    <Authors>asti</Authors>
+    <Company />
+    <PackageTags>build, ci, automation, bot, slack</PackageTags>
   </PropertyGroup>
 
   <ItemGroup>
