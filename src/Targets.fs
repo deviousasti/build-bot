@@ -39,7 +39,7 @@ let (|Bash|_|) =
 
 let (|Command|_|) =
     ifContains "build.cmd" (
-        exec "bash " "/c build.cmd %s"
+        exec "cmd " "/c build.cmd %s"
     )
 
 let (|MSBuild|_|) =
