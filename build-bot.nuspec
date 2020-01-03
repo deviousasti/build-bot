@@ -16,6 +16,8 @@
   </metadata>
   <files>
 		<file src="src\bin\Debug\netcoreapp3.0\*.*" target="." /> 
+		<file src="LICENSE*" target="." /> 
+		<file src="VERIFICATION*" target="." /> 
   </files>
   
 </package>
