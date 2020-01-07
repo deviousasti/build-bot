@@ -15,9 +15,9 @@
     <tags>bot git build-automation continuous-integration slack</tags>
   </metadata>
   <files>
-		<file src="src\bin\Debug\netcoreapp3.0\*.*" target="." /> 
-		<file src="LICENSE*" target="." /> 
-		<file src="VERIFICATION*" target="." /> 
+		<file src="src\bin\Debug\netcoreapp3.0\*.*" target="bin" /> 
+		<file src="LICENSE*" target="bin" /> 
+		<file src="VERIFICATION*" target="bin" /> 
   </files>
   
 </package>
