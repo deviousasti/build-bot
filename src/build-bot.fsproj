@@ -18,6 +18,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="Env.fs" />
     <Compile Include="Rx.fs" />
     <Compile Include="Shell.fs" />
     <Compile Include="ConfigParser.fs" />

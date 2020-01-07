@@ -3,14 +3,6 @@ open System.IO
 open FSharp.Control.Reactive
 open FatSlack.Types
 
-module Env = 
-    let isValid = not << String.IsNullOrWhiteSpace
-
-    let getValue key = 
-        match Environment.GetEnvironmentVariable(key) with 
-        | s when isValid s -> Some(s)
-        | _ -> None
-
     
 [<EntryPoint>]
 let main args =  
@@ -25,8 +17,10 @@ let main args =
     printfn "Workspace: %s" workspace
     let graph = ref (Build.gitGraph workspace)
     
+    printfn "Logging to: %s" (Path.GetTempPath())
+
     printfn "Tracking Repositories:"
-    !graph |> Build.urls |> Seq.iteri(printfn "%d>\t%s")
+    !graph |> Build.urls |> Seq.iteri(printfn "%d>\t%s")    
 
     let messages =
         match Env.getValue "BOT_SLACK_API_TOKEN" with
@@ -34,14 +28,18 @@ let main args =
                     printfn "Use environment variable BOT_SLACK_API_TOKEN"
                     Subject.empty2
         | Some(token) -> Bot.start token 
-                          [
-                              Commands.hiCommand    workspace graph
-                              Commands.pushCommand  workspace graph
-                              Commands.buildCommand workspace graph
-                              Commands.scanCommand  workspace graph
-                              Commands.addCommand   workspace graph
-                              Commands.listCommand  workspace graph
-                          ]
+                          (
+                              [
+                                  Commands.hiCommand    
+                                  Commands.pushCommand  
+                                  Commands.buildCommand 
+                                  Commands.scanCommand  
+                                  Commands.addCommand   
+                                  Commands.removeCommand   
+                                  Commands.listCommand  
+                              ] 
+                              |> List.map(fun f -> f workspace graph)
+                          )
                           
     let subscriptions =
         [
