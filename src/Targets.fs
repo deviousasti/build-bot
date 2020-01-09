@@ -34,12 +34,12 @@ let (|Powershell|_|) =
 
 let (|Bash|_|) =
     ifContains "build.sh" (
-        exec "bash " "-c ./build.sh %s"
+        exec "bash" "-c ./build.sh %s"
     )
 
 let (|Command|_|) =
-    ifContains "build.cmd" (
-        exec "cmd " "/c build.cmd %s"
+    ifContains "build.bat" (
+        exec "cmd" "/c build.bat %s"
     )
 
 let (|MSBuild|_|) =
