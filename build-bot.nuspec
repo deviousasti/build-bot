@@ -7,15 +7,31 @@
     <authors>asti</authors>
     <owners>asti</owners>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <license type="expression">MIT</license>
+    <licenseUrl>https://licenses.nuget.org/MIT</licenseUrl>
     <projectUrl>https://github.com/deviousasti/build-bot</projectUrl>
     <iconUrl>https://raw.githubusercontent.com/deviousasti/build-bot/master/icon.png</iconUrl>
-    <description>A zero configuration continuous build bot</description>
+	<projectSourceUrl>https://github.com/deviousasti/build-bot.git</projectSourceUrl>
+	<packageSourceUrl>https://github.com/deviousasti/build-bot</packageSourceUrl>
+    <description>
+		A zero configuration continuous build system as a chatbot
+		build-bot is for you if you don't want to configure build pipelines per repository
+		•	Don't write any YML, XML, TOML or JSON
+		•	Detects common build methods
+		•	Deep Git submodule tracking
+		•	No need to configure a webserver, reverse proxy or HTTPS
+		•	Works behind a firewall
+		•	Run with local resources
+		
+		See the project site for more details
+
+		
+	</description>
     <copyright>Copyright 2020</copyright>
     <tags>bot git build-automation continuous-integration slack</tags>
   </metadata>
   <files>
 		<file src="src\bin\Debug\netcoreapp3.0\*.*" target="bin" /> 
+		<file src="README*" target="bin" /> 
 		<file src="LICENSE*" target="bin" /> 
 		<file src="VERIFICATION*" target="bin" /> 
   </files>
