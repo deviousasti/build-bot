@@ -1,11 +1,32 @@
-﻿Source: https://github.com/deviousasti/build-bot
+
+Source: https://github.com/deviousasti/build-bot
 Author: https://github.com/deviousasti 
 Maintainer: https://github.com/deviousasti 
 
 
 VERIFICATION
-Verification is intended to assist the Chocolatey moderators and community
-in verifying that this package's contents are trustworthy.
- 
-<Include details of how to verify checksum contents>
-<If software vendor, explain that here - checksum verification instructions are optional>
+------------
+
+To verify, run
+ls *.dll,*.exe | Sort-Object -Property Name | Get-FileHash | Format-Table Hash, @{ Label = 'File'; Expression = { .Path | Split-Path -Leaf }}
+
+And compare with the file hashes below.
+
+A copy of this file can be found at:
+https://raw.githubusercontent.com/deviousasti/build-bot/master/VERIFICATION.txt
+
+File Hashes:
+
+
+Hash                                                             File                       
+----                                                             ----                       
+468AA898AE3A350CFBAA60FD9364D0D78A0F537E79DFB84BCAEA0FFC4BE5DC36 build-bot.dll              
+E053ABFAAAE1D5F1AE1E59EB745DF92943B7FB5D315ECF792599D0EC6A6C0793 build-bot.exe              
+9BFBBAB12B970EB161A2A146556C8D87049FAC9941C9270BF7B6AC704ED7196C FatSlack.dll               
+293A7A4BFA254FB8E98F264FF40D584B856EB9686BB09B7769833306E90BAF4E FSharp.Control.Reactive.dll
+2BFB97B847A247A93DD6A59A01DFF85E2437F5C3133277A4F10A39C1909D63F2 FSharp.Core.dll            
+99177A4CBE03625768D64A3D73392310372888F74C3EB271CF775E93057A38E6 Newtonsoft.Json.dll        
+0C6449FF52E96ECC9FADA0ABC52AE1B0EF1D68F4A6AA8F82511A7411E6018599 System.Reactive.dll        
+
+
+
