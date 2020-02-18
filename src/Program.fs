@@ -38,7 +38,7 @@ let main args =
                                   Commands.removeCommand   
                                   Commands.listCommand  
                               ] 
-                              |> List.map(fun f -> f workspace graph)
+                              |> List.map(fun cmd -> cmd workspace graph)
                           )
                           
     let subscriptions =

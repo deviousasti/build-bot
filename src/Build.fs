@@ -81,9 +81,9 @@ let getBuildTargets buildroot =
     let file = Path.Combine(buildroot, "build")
     let config = ConfigParser.tryParse file |> List.ofSeq
     match config with 
-    | [] -> ["debug";"release"] |> List.map(fun t -> t, Map.empty)
-    | [x] -> x.Values |> Map.toList |> List.map (fun (key, value) -> key, Map.empty)
-    | many -> many |> List.map (fun section -> section.Name, section.Values)
+    | []        -> ["debug";"release"] |> List.map(fun t -> t, Map.empty)
+    | [single]  -> single.Values |> Map.toList |> List.map (fun (key, value) -> key, Map.empty)
+    | many      -> many |> List.map (fun section -> section.Name, section.Values)
 
 type Pipeline = string * (string -> IObservable<string>)
 
