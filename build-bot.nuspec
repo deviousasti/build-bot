@@ -12,6 +12,7 @@
     <iconUrl>https://raw.githubusercontent.com/deviousasti/build-bot/master/icon.png</iconUrl>
 	<projectSourceUrl>https://github.com/deviousasti/build-bot.git</projectSourceUrl>
 	<packageSourceUrl>https://github.com/deviousasti/build-bot</packageSourceUrl>
+	<summary>A continuous build system you can talk to</summary>
     <description>
 		A zero configuration continuous build system as a chatbot
 		build-bot is for you if you don't want to configure build pipelines per repository
