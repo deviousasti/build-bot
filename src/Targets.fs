@@ -38,9 +38,14 @@ let (|Bash|_|) =
         exec "bash" "-c ./build.sh %s"
     )
 
-let (|Command|_|) =
+let (|Batch|_|) =
     ifContains "build.bat" (
         exec "cmd" "/c build.bat %s"
+    )
+
+let (|Command|_|) =
+    ifContains "build.cmd" (
+        exec "cmd" "/c build.cmd %s"
     )
 
 let (|MSBuild|_|) =

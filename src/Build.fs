@@ -94,6 +94,7 @@ let build (repo:Repository) =
         match buildroot with 
         | Targets.Powershell x  -> [x]
         | Targets.Bash x        -> [x]
+        | Targets.Batch x       -> [x]
         | Targets.Command x     -> [x]
         | Targets.MSBuild x     -> [x]
         | Targets.Makefile x    -> [x]
