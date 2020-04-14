@@ -9,10 +9,12 @@ let main args =
    
     let workspace = 
         match Env.getValue "BOT_WORKSPACE" with         
-        | None ->   printfn "Workspace is missing. Using current directory."        
-                    printfn "Use environment variable BOT_WORKSPACE"
-                    Directory.GetCurrentDirectory()
-        | Some(dir) -> dir
+        | None ->       printfn "Workspace is missing. Using current directory."        
+                        printfn "Use environment variable BOT_WORKSPACE"
+                        Directory.GetCurrentDirectory()
+        | Some(dir) when (Directory.Exists dir) ->  dir
+        | Some(notexist) ->  failwith (sprintf "Workspace directory %s does not exist" notexist)
+                        
 
     printfn "Workspace: %s" workspace
     let graph = ref (Build.gitGraph workspace)
