@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
     <RootNamespace>build_bot</RootNamespace>
     <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
     <AssemblyVersion>1.0.1.0</AssemblyVersion>
