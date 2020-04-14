@@ -2,6 +2,7 @@
 
 open System
 open System.IO
+open FSharp.Control.Reactive
 
 let searchOptions = 
     let opt = EnumerationOptions()
@@ -25,7 +26,7 @@ let ifFileContains file (text: string) value path =
         None
 
 let exec cmd (args: Printf.StringFormat<string -> string>) settings target =         
-    Shell.create settings cmd (sprintf args target)
+    StdioObservable.create settings cmd (sprintf args target)
     
 let (|Powershell|_|) =
     ifContains "build.ps1" (

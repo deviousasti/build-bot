@@ -2,6 +2,7 @@
 
 open System
 open System.IO
+open FSharp.Control.Reactive
 
 module Paths =
     let config dir = Path.Combine(dir, "config")
@@ -10,14 +11,14 @@ module Paths =
 
 let where = 
     let is_unix = Environment.OSVersion.Platform = PlatformID.Unix
-    let path = Shell.where (if is_unix then "git" else "git.exe")
+    let path = StdioObservable.where (if is_unix then "git" else "git.exe")
     match path with 
     | Some(x) -> x 
     | None -> failwith "Git not found in path"
 
-let private settings = Shell.Options.defaultSettings
+let private settings = StdioObservable.Options.defaults
 
-let git args path = Shell.create { settings with WorkingDirectory = Some(path) } where args
+let git args path = StdioObservable.create { settings with WorkingDirectory = Some(path) } where args
 
 let version () = git "--version" "."
 

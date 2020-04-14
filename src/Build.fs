@@ -105,7 +105,7 @@ let build (repo:Repository) =
         | _ -> []
 
     let targets = getBuildTargets buildroot
-    let settings = { Shell.Options.defaultSettings with WorkingDirectory = Some buildroot }
+    let settings = { StdioObservable.Options.defaults with WorkingDirectory = Some buildroot }
     
     seq {
         for pipeline in pipelines do

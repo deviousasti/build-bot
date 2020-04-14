@@ -2,3 +2,7 @@
 	path = lib/fatslack
 	url = https://github.com/deviousasti/FatSlack.git
 	branch = master
+[submodule "lib/stdio-rx"]
+	path = lib/stdio-rx
+	url = https://github.com/deviousasti/stdio-rx.git
+	branch = master

@@ -2,7 +2,6 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>netcoreapp3.0</TargetFramework>
     <RootNamespace>build_bot</RootNamespace>
     <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
     <AssemblyVersion>1.0.1.0</AssemblyVersion>
@@ -20,7 +19,6 @@
   <ItemGroup>
     <Compile Include="Env.fs" />
     <Compile Include="Rx.fs" />
-    <Compile Include="Shell.fs" />
     <Compile Include="ConfigParser.fs" />
     <Compile Include="Git.fs" />
     <Compile Include="Targets.fs" />
@@ -36,6 +34,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\stdio-rx\src\stdio-rx-fs\stdio-rx-fs.fsproj" />
     <ProjectReference Include="..\lib\fatslack\src\FatSlack\FatSlack.fsproj" />
   </ItemGroup>
 
